@@ -1,24 +1,46 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { initializeFirebase } from "@/services/firebase";
 import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import 'react-native-reanimated';
+import Toast from 'react-native-toast-message';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+const { auth } = initializeFirebase();
 
 export const unstable_settings = {
-  anchor: '(tabs)',
+  anchor: '(home)',
 };
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const [isInitialized, setIsInitialized] = useState(false);
 
+
+  useEffect(() => {
+    if (isInitialized) {
+      return;
+    }
+    setTimeout(() => {
+      setIsInitialized(true);
+    }, 2000);
+  }, []);
+
+  if (!isInitialized) {
+    return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <ActivityIndicator size="large" color="#0000ff" />
+    </View>;
+  }
+
+  const isProtected = !!auth.currentUser;
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+      <>
+      <Stack screenOptions={{ headerShown: false }} initialRouteName={isProtected ? '(home)' : 'index'}>
+        <Stack.Screen name="index"  />
+        <Stack.Screen name="login"  />
+        <Stack.Screen name="signup" />
+        <Stack.Screen name="(home)"/>
       </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+      <Toast/>
+      </>
+      
   );
 }
