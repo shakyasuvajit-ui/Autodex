@@ -38,8 +38,8 @@ const variantConfig: Record<Props["type"] & string, VariantConfig> = {
     },
     outline: {
         gradient: ["transparent", "transparent"],
-        borderColor: "#3F8782",
-        textColor: "#3F8782",
+        borderColor: "#0356C5",
+        textColor: "#FFFFFF",
     },
     danger: {
         gradient: ["#E58A8A", "#B33A3A"],

@@ -1,8 +1,145 @@
-import {View, Text} from 'react-native';
+import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import React, { useState } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
+import { BackButton } from "@/components/back-button";
+import { Button } from "@/components/buttons";
+import ProgressModel from "@/components/progress-model";
+import { auth, signOut } from "@/services/firebase";
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#000000",
+  },
+  safeArea: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+  profileHeaderContainer: {
+    alignItems: "center",
+    marginTop: 10,
+  },
+  profileImage: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    borderWidth: 1.5,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "#000000",
+  },
+  profileName: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    marginTop: 16,
+    textAlign: "center",
+  },
+  profileEmail: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#0356C5",
+    marginTop: 4,
+    textAlign: "center",
+  },
+  collectionSection: {
+    marginTop: 28,
+  },
+  collectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  collectionCard: {
+    borderRadius: 24,
+    borderWidth: 1.5,
+    borderColor: "#0356C5",
+    paddingVertical: 22,
+    paddingHorizontal: 24,
+    gap: 12,
+    overflow: "hidden",
+  },
+  collectionItemText: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#FFFFFF",
+  },
+  actionContainer: {
+    marginTop: 36,
+  },
+});
+
 export default function Profile() {
+  const router = useRouter();
+  const [logoutProgress, setLogoutProgress] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      setLogoutProgress(true);
+      await auth.signOut();
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Failed to logout",
+      });
+    } finally {
+      router.push("/login");
+      setLogoutProgress(false);
+    }
+  }
+
+
   return (
-    <View >
-      <Text>Profile Page</Text>
+    <View style={styles.container}>
+      <SafeAreaView style={styles.safeArea}>
+        <BackButton type="light" />
+          {/* header section */}
+          <View style={styles.profileHeaderContainer}>
+            <Image
+              source={require("@/assets/png/pfp.png")}
+              style={styles.profileImage}
+              contentFit="contain"
+            />
+            <Text style={styles.profileName}>{auth.currentUser?.displayName ?? 'N/A'}</Text>
+            <Text style={styles.profileEmail}>{auth.currentUser?.email ?? 'N/A'}</Text>
+          </View>
+          <View style={{paddingHorizontal: 20}}>
+            {/* collection section */}
+          <View style={styles.collectionSection}>
+            <Text style={styles.collectionTitle}>My Collection</Text>
+            <LinearGradient
+              colors={["#0052CC", "#003380", "#001A40", "#000A1A"]}
+              start={{ x: 0, y: 0.5 }}
+              end={{ x: 1, y: 0.5 }}
+              style={styles.collectionCard}
+            >
+              <Text style={styles.collectionItemText}>20 Vehicles</Text>
+              <Text style={styles.collectionItemText}>8 Cars</Text>
+              <Text style={styles.collectionItemText}>12 Bikes</Text>
+            </LinearGradient>
+          </View>
+          <View style={styles.actionContainer}>
+            <Button
+              title="Log Out"
+              type="outline"
+              onPress={handleLogout}
+              loading={logoutProgress}
+              disabled={logoutProgress}
+            />
+          </View>
+          </View>
+          
+      </SafeAreaView>
+      <ProgressModel visible={logoutProgress} />
     </View>
   );
 }
